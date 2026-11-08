@@ -33,43 +33,35 @@ const books = [
 ];
 
 async function main() {
-  // Genres (upsert makes the seed safe to re-run)
-  const genreIds: Record<string, number> = {};
-  for (const g of genres) {
-    const row = await prisma.genre.upsert({
-      where: { name: g.name },
-      update: {},
-      create: g,
-    });
-    genreIds[g.name] = row.id;
-  }
+  // Clear existing data so the seed can be re-run
+  await prisma.review.deleteMany();
+  await prisma.book.deleteMany();
+  await prisma.genre.deleteMany();
+  await prisma.user.deleteMany();
 
-  // Books, linked to genres via genreId
+  const createdGenres = await Promise.all(
+    genres.map((g) => prisma.genre.create({ data: g })),
+  );
+
   for (const b of books) {
-    await prisma.book.upsert({
-      where: { isbn: b.isbn },
-      update: {},
-      create: {
+    const genre = createdGenres.find((g) => g.name === b.genre)!;
+    await prisma.book.create({
+      data: {
         title: b.title,
         author: b.author,
         isbn: b.isbn,
         publishedYear: b.year,
         copiesAvailable: 3,
-        genreId: genreIds[b.genre],
+        genreId: genre.id,
       },
     });
   }
 
-  // Sample users
-  await prisma.user.upsert({
-    where: { email: 'librarian@example.com' },
-    update: {},
-    create: { email: 'librarian@example.com', name: 'Lena Librarian', role: 'LIBRARIAN' },
+  await prisma.user.create({
+    data: { email: 'librarian@example.com', name: 'Lena Librarian', role: 'LIBRARIAN' },
   });
-  await prisma.user.upsert({
-    where: { email: 'patron@example.com' },
-    update: {},
-    create: { email: 'patron@example.com', name: 'Pat Patron', role: 'PATRON' },
+  await prisma.user.create({
+    data: { email: 'patron@example.com', name: 'Pat Patron', role: 'PATRON' },
   });
 
   console.log(`Seeded ${genres.length} genres and ${books.length} books.`);
