@@ -10,3 +10,23 @@ Each `Book` stores a `genreId` foreign key pointing to a single row in the `Genr
 - **No inconsistency.** Embedded strings drift ("Sci-Fi", "SciFi", "science fiction"). A foreign key guarantees every book points to a genre that really exists.
 - **Genres are queried on their own.** "List all genres" and "all books in a genre" are simple indexed queries.
 - **Genres carry their own data.** A genre can have its own attributes without bloating every book record.
+
+## Screenshots
+
+Screenshots of the seeded database in Prisma Studio.
+
+**Genre table (4 genres)**
+
+![Genre table](screenshots/genre.png)
+
+**Book table (16 books, each linked to a genre via `genreId`)**
+
+![Book table](screenshots/books.png)
+
+**User table (one librarian, one patron)**
+
+![User table](screenshots/user.png)
+
+**Review table (stretch task)**
+
+![Review table](screenshots/review.png)
