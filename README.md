@@ -1,3 +1,5 @@
+A library catalog API built with NestJS, Prisma and PostgreSQL.
+
 # library-management-system
 
 A library catalog API built with NestJS, Prisma and PostgreSQL (hosted on Neon).
