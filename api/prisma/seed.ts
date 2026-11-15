@@ -1,6 +1,7 @@
 // Library catalog data layer
 
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -58,12 +59,14 @@ async function main() {
     });
   }
 
-  // Placeholder hashes only; real passwords must be hashed before storing
+  // Sample accounts with bcrypt-hashed passwords (login with Password123!)
+  const passwordHash = await bcrypt.hash('Password123!', 10);
+
   await prisma.user.create({
-    data: { email: 'librarian@example.com', password: 'hashed-password-placeholder', role: 'LIBRARIAN' },
+    data: { email: 'librarian@example.com', password: passwordHash, role: 'LIBRARIAN' },
   });
   await prisma.user.create({
-    data: { email: 'patron@example.com', password: 'hashed-password-placeholder', role: 'PATRON' },
+    data: { email: 'patron@example.com', password: passwordHash, role: 'PATRON' },
   });
 
   console.log(`Seeded ${genres.length} genres and ${books.length} books.`);
