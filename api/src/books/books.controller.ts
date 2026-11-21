@@ -2,7 +2,7 @@ import {
   Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
-import { BooksService } from './books.service';
+import { BooksService, SORT_FIELDS } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -14,6 +14,8 @@ const toInt = (value?: string) => {
   return Number.isNaN(n) ? undefined : n;
 };
 
+const toSort = (value?: string) => SORT_FIELDS.find((field) => field === value);
+
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
@@ -24,12 +26,14 @@ export class BooksController {
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('sortBy') sortBy?: string,
   ) {
     return this.booksService.findAll({
       genreId: toInt(genreId),
       search,
       page: toInt(page),
       limit: toInt(limit),
+      sortBy: toSort(sortBy),
     });
   }
 

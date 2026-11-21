@@ -6,11 +6,29 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
+export const SORT_FIELDS = [
+  'title',
+  'author',
+  'isbn',
+  'totalCopies',
+  'availableCopies',
+] as const;
+export type SortField = (typeof SORT_FIELDS)[number];
+
+const SORTS: Record<SortField, Prisma.BookOrderByWithRelationInput> = {
+  title: { title: 'asc' },
+  author: { author: 'asc' },
+  isbn: { isbn: 'asc' },
+  totalCopies: { totalCopies: 'asc' },
+  availableCopies: { availableCopies: 'asc' },
+};
+
 export interface BookQuery {
   genreId?: number;
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: SortField;
 }
 
 @Injectable()
@@ -30,12 +48,17 @@ export class BooksService {
       ];
     }
 
+    // The id tie-breaker keeps page order stable when two books share a value
+    const orderBy: Prisma.BookOrderByWithRelationInput[] = query.sortBy
+      ? [SORTS[query.sortBy], { id: 'asc' }]
+      : [{ id: 'asc' }];
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.book.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
-        orderBy: { id: 'asc' },
+        orderBy,
         include: { genre: true },
       }),
       this.prisma.book.count({ where }),
